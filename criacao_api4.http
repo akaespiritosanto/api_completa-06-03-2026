@@ -1,0 +1,243 @@
+@criacao_api4_HostAddress = http://localhost:5223
+@bandId1 = 1
+@bandId2 = 2
+@cdId1 = 1
+@cdId2 = 2
+
+############################################################
+### HEALTH CHECK (base route test)
+############################################################
+GET {{criacao_api4_HostAddress}}/bands
+Accept: application/json
+
+###
+
+############################################################
+### BANDS - CREATE (1)
+############################################################
+POST {{criacao_api4_HostAddress}}/bands
+Content-Type: application/json
+
+{
+  "name": "Linkin Park",
+  "description": "Alternative rock band."
+}
+
+###
+
+############################################################
+### BANDS - CREATE (2)
+############################################################
+POST {{criacao_api4_HostAddress}}/bands
+Content-Type: application/json
+
+{
+  "name": "Metallica",
+  "description": "Heavy metal band."
+}
+
+###
+
+############################################################
+### BANDS - GET ALL
+############################################################
+GET {{criacao_api4_HostAddress}}/bands
+Accept: application/json
+
+###
+
+############################################################
+### BANDS - GET BY ID (existing)
+############################################################
+GET {{criacao_api4_HostAddress}}/bands/{{bandId1}}
+Accept: application/json
+
+###
+
+############################################################
+### BANDS - GET BY ID (not found)
+############################################################
+GET {{criacao_api4_HostAddress}}/bands/999
+Accept: application/json
+
+###
+
+############################################################
+### BANDS - UPDATE (existing)
+############################################################
+PUT {{criacao_api4_HostAddress}}/bands/{{bandId1}}
+Content-Type: application/json
+
+{
+  "name": "Linkin Park (Updated)",
+  "description": "Updated band description."
+}
+
+###
+
+############################################################
+### BANDS - UPDATE (invalid payload)
+############################################################
+PUT {{criacao_api4_HostAddress}}/bands/{{bandId1}}
+Content-Type: application/json
+
+{
+  "name": "   ",
+  "description": "This should fail."
+}
+
+###
+
+############################################################
+### CDS - CREATE (1)
+############################################################
+POST {{criacao_api4_HostAddress}}/cds
+Content-Type: application/json
+
+{
+  "name": "Hybrid Theory",
+  "bandId": {{bandId1}},
+  "rating": 5
+}
+
+###
+
+############################################################
+### CDS - CREATE (2)
+############################################################
+POST {{criacao_api4_HostAddress}}/cds
+Content-Type: application/json
+
+{
+  "name": "Meteora",
+  "bandId": {{bandId1}},
+  "rating": 5
+}
+
+###
+
+############################################################
+### CDS - CREATE (invalid band)
+############################################################
+POST {{criacao_api4_HostAddress}}/cds
+Content-Type: application/json
+
+{
+  "name": "Invalid CD",
+  "bandId": 999,
+  "rating": 4
+}
+
+###
+
+############################################################
+### CDS - GET ALL
+############################################################
+GET {{criacao_api4_HostAddress}}/cds
+Accept: application/json
+
+###
+
+############################################################
+### CDS - GET BY ID (existing)
+############################################################
+GET {{criacao_api4_HostAddress}}/cds/{{cdId1}}
+Accept: application/json
+
+###
+
+############################################################
+### CDS - GET BY ID (not found)
+############################################################
+GET {{criacao_api4_HostAddress}}/cds/999
+Accept: application/json
+
+###
+
+############################################################
+### CDS - GET BY BAND
+############################################################
+GET {{criacao_api4_HostAddress}}/cds/band/{{bandId1}}
+Accept: application/json
+
+###
+
+############################################################
+### CDS - SEARCH BY NAME
+############################################################
+GET {{criacao_api4_HostAddress}}/cds/search?name=mete
+Accept: application/json
+
+###
+
+############################################################
+### CDS - SEARCH BY NAME (invalid query)
+############################################################
+GET {{criacao_api4_HostAddress}}/cds/search?name=
+Accept: application/json
+
+###
+
+############################################################
+### CDS - UPDATE (existing)
+############################################################
+PUT {{criacao_api4_HostAddress}}/cds/{{cdId1}}
+Content-Type: application/json
+
+{
+  "name": "Hybrid Theory (Remastered)",
+  "bandId": {{bandId1}},
+  "rating": 4
+}
+
+###
+
+############################################################
+### CDS - UPDATE (invalid rating)
+############################################################
+PUT {{criacao_api4_HostAddress}}/cds/{{cdId1}}
+Content-Type: application/json
+
+{
+  "name": "Hybrid Theory",
+  "bandId": {{bandId1}},
+  "rating": 10
+}
+
+###
+
+############################################################
+### BANDS - GET WITH CDS
+############################################################
+GET {{criacao_api4_HostAddress}}/bands/with-cds/{{bandId1}}
+Accept: application/json
+
+###
+
+############################################################
+### CDS - DELETE (existing)
+############################################################
+DELETE {{criacao_api4_HostAddress}}/cds/{{cdId2}}
+
+###
+
+############################################################
+### CDS - DELETE (not found)
+############################################################
+DELETE {{criacao_api4_HostAddress}}/cds/999
+
+###
+
+############################################################
+### BANDS - DELETE (existing)
+############################################################
+DELETE {{criacao_api4_HostAddress}}/bands/{{bandId2}}
+
+###
+
+############################################################
+### BANDS - DELETE (not found)
+############################################################
+DELETE {{criacao_api4_HostAddress}}/bands/999
+
+###
