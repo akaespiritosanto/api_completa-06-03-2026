@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("criacao_api4")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bb7518aacf22e1155f4232b5fd7291dc86e5357f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4ce2faa5b2c3ec8510d0654338141a54aac91c06")]
 [assembly: System.Reflection.AssemblyProductAttribute("criacao_api4")]
 [assembly: System.Reflection.AssemblyTitleAttribute("criacao_api4")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

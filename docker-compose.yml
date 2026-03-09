@@ -1,0 +1,18 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: criacao_api4
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - CONNECTION_STRING=Data Source=/data/cds.db
+    volumes:
+      - cds_data:/data
+
+volumes:
+  cds_data:
