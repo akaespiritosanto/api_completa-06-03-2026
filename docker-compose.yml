@@ -1,18 +1,29 @@
+x-api-base: &api_base
+  env_file:
+    - .env
+  volumes:
+    - sqlite_data:/data
+  ports:
+    - "8080:8080"
+
 services:
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: criacao_api4
-    ports:
-      - "8080:8080"
-    env_file:
-      - .env
+    <<: *api_base
+    profiles: ["build"]
+    build: .
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - CONNECTION_STRING=Data Source=/data/cds.db
-    volumes:
-      - cds_data:/data
+      - CONNECTION_STRING=${CONNECTION_STRING}
+
+  api_image:
+    <<: *api_base
+    profiles: ["image"]
+    image: ${API_IMAGE:-akaespiritosanto/criacao_api4:ben}
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Use an absolute path because this image may not have the same path-resolution logic as your local build.
+      - CONNECTION_STRING=Data Source=/data/db/cds.db
+    entrypoint: ["/bin/sh", "-lc", "mkdir -p /data/db && exec dotnet criacao_api4.dll"]
 
 volumes:
-  cds_data:
+  sqlite_data:

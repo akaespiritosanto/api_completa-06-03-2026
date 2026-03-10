@@ -2,6 +2,7 @@ namespace criacao_api4.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using criacao_api4.Services;
 using criacao_api4.Models;
+using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("cds")]
@@ -108,6 +109,16 @@ public class CdsController : ControllerBase
             _logger.LogError(exception, "Error while creating a CD.");
             return BadRequest(exception.Message);
         }
+        catch (DbUpdateException exception)
+        {
+            _logger.LogError(exception, "Database error while creating a CD.");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Database error.");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Unexpected error while creating a CD.");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Unexpected error.");
+        }
     }
 
     /// <summary>
@@ -138,6 +149,16 @@ public class CdsController : ControllerBase
             _logger.LogError(exception, "Error while updating CD with id {CdId}.", id);
             return BadRequest(exception.Message);
         }
+        catch (DbUpdateException exception)
+        {
+            _logger.LogError(exception, "Database error while updating CD with id {CdId}.", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, "Database error.");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Unexpected error while updating CD with id {CdId}.", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, "Unexpected error.");
+        }
     }
 
     /// <summary>
@@ -152,11 +173,25 @@ public class CdsController : ControllerBase
     [HttpDelete("{id:int}")]
     public IActionResult Delete(int id)
     {
-        var deleted = _service.Delete(id);
-        if (!deleted)
+        try
         {
-            return NotFound($"No CD exists with the provided ID: {id}.");
+            var deleted = _service.Delete(id);
+            if (!deleted)
+            {
+                return NotFound($"No CD exists with the provided ID: {id}.");
+            }
+
+            return NoContent();
         }
-        return NoContent();
+        catch (DbUpdateException exception)
+        {
+            _logger.LogError(exception, "Database error while deleting CD with id {CdId}.", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, "Database error.");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Unexpected error while deleting CD with id {CdId}.", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, "Unexpected error.");
+        }
     }
 }

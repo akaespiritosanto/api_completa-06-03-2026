@@ -1,4 +1,5 @@
 using criacao_api4.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace criacao_api4.Services;
 
@@ -7,14 +8,12 @@ public class BandServices
     private readonly AppDbContext _context;
     private readonly ILogger<BandServices> _logger;
 
-// ############################################################################################################
     public BandServices(AppDbContext context, ILogger<BandServices> logger)
     {
         _context = context;
         _logger = logger;
     }
 
-// ############################################################################################################
     public List<Band> GetAll()
     {
         return _context.Bands
@@ -22,13 +21,11 @@ public class BandServices
             .ToList();
     }
 
-// ############################################################################################################
     public Band? GetById(int id)
     {
         return _context.Bands.FirstOrDefault(b => b.bandId == id);
     }
 
-// ############################################################################################################
     public Band? GetWithCds(int id)
     {
         var band = _context.Bands.FirstOrDefault(b => b.bandId == id);
@@ -51,8 +48,6 @@ public class BandServices
         };
     }
 
-    // ############################################################################################################
-
     public Band Create(Band band)
     {
         ValidateBand(band);
@@ -63,8 +58,6 @@ public class BandServices
         _context.SaveChanges();
         return band;
     }
-
-    // ############################################################################################################
 
     public Band? Update(int id, Band band)
     {
@@ -83,8 +76,6 @@ public class BandServices
         return existingBand;
     }
 
-    // ############################################################################################################
-
     public bool Delete(int id)
     {
         var band = _context.Bands.FirstOrDefault(b => b.bandId == id);
@@ -95,10 +86,29 @@ public class BandServices
 
         _context.Bands.Remove(band);
         _context.SaveChanges();
+        ResetSqliteSequence("Bands", "bandId");
+        ResetSqliteSequence("Cds", "cdId");
         return true;
     }
 
-    // ############################################################################################################
+    private void ResetSqliteSequence(string tableName, string idColumn)
+    {
+        if (!_context.Database.IsSqlite())
+        {
+            return;
+        }
+
+        try
+        {
+            _context.Database.ExecuteSqlRaw($"DELETE FROM sqlite_sequence WHERE name='{tableName}';");
+            _context.Database.ExecuteSqlRaw(
+                $"INSERT INTO sqlite_sequence(name, seq) SELECT '{tableName}', IFNULL(MAX({idColumn}), 0) FROM {tableName};");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(exception, "Could not reset SQLite sequence for table {TableName}.", tableName);
+        }
+    }
 
     private void ValidateBand(Band band)
     {

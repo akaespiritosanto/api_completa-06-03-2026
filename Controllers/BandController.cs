@@ -2,6 +2,7 @@ namespace criacao_api4.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using criacao_api4.Services;
 using criacao_api4.Models;
+using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("bands")]
@@ -90,6 +91,16 @@ public class BandsController : ControllerBase
             _logger.LogError(exception, "Error while creating a band.");
             return BadRequest(exception.Message);
         }
+        catch (DbUpdateException exception)
+        {
+            _logger.LogError(exception, "Database error while creating a band.");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Database error.");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Unexpected error while creating a band.");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Unexpected error.");
+        }
     }
 
     /// <summary>
@@ -120,6 +131,16 @@ public class BandsController : ControllerBase
             _logger.LogError(exception, "Error while updating band with id {BandId}.", id);
             return BadRequest(exception.Message);
         }
+        catch (DbUpdateException exception)
+        {
+            _logger.LogError(exception, "Database error while updating band with id {BandId}.", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, "Database error.");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Unexpected error while updating band with id {BandId}.", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, "Unexpected error.");
+        }
     }
 
     /// <summary>
@@ -134,11 +155,25 @@ public class BandsController : ControllerBase
     [HttpDelete("{id:int}")]
     public IActionResult Delete(int id) 
     {
-        var deleted = _service.Delete(id);
-        if (!deleted)
+        try
         {
-            return NotFound($"No band exists with the provided ID: {id}.");
+            var deleted = _service.Delete(id);
+            if (!deleted)
+            {
+                return NotFound($"No band exists with the provided ID: {id}.");
+            }
+
+            return NoContent();
         }
-        return NoContent();
+        catch (DbUpdateException exception)
+        {
+            _logger.LogError(exception, "Database error while deleting band with id {BandId}.", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, "Database error.");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Unexpected error while deleting band with id {BandId}.", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, "Unexpected error.");
+        }
     }
 }

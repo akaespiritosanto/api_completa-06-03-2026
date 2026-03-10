@@ -1,0 +1,9 @@
+bin/
+obj/
+publish/
+.dotnet/
+
+# SQLite runtime files (keep the main db file tracked if you want)
+db/*.db-wal
+db/*.db-shm
+db/*.db-journal

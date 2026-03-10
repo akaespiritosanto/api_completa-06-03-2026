@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\criacao_api4.props" />
-</Project>

@@ -1,4 +1,4 @@
-@criacao_api4_HostAddress = http://localhost:5223
+@criacao_api4_HostAddress = http://localhost:8080
 @bandId1 = 1
 @bandId2 = 2
 @cdId1 = 1
