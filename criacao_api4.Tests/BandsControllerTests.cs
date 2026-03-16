@@ -1,4 +1,5 @@
 using criacao_api4.Controllers;
+using criacao_api4.Dtos;
 using criacao_api4.Models;
 using criacao_api4.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -20,12 +21,12 @@ public class BandsControllerTests
         db.SaveChanges();
         var controller = CreateController(db);
 
-        var response = controller.GetAll();
+        var response = controller.GetAll(new PaginationQuery());
 
         Assert.IsInstanceOfType(response.Result, typeof(OkObjectResult));
         var ok = (OkObjectResult)response.Result!;
-        var bands = (List<Band>)ok.Value!;
-        Assert.AreEqual(2, bands.Count);
+        var result = (PagedResult<Band>)ok.Value!;
+        Assert.AreEqual(2, result.items.Count);
     }
 
     [TestMethod]

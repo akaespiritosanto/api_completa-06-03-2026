@@ -2,6 +2,7 @@ namespace criacao_api4.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using criacao_api4.Services;
 using criacao_api4.Models;
+using criacao_api4.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 [ApiController]
@@ -23,12 +24,12 @@ public class CdsController : ControllerBase
     /// <remarks>
     /// Returns the complete list of CDs currently stored in the database.
     /// </remarks>
+    /// <param name="pagination">Pagination parameters.</param>
     /// <response code="200">CDs retrieved successfully.</response>
     [HttpGet]
-    public ActionResult<List<Cd>> GetAll()
+    public ActionResult<PagedResult<Cd>> GetAll([FromQuery] PaginationQuery pagination)
     {
-        var cds = _service.GetAll();
-        return Ok(cds);
+        return Ok(_service.GetAll(pagination));
     }
 
     /// <summary>
@@ -58,12 +59,12 @@ public class CdsController : ControllerBase
     /// Returns all CDs associated with the specified band identifier.
     /// </remarks>
     /// <param name="bandId">Unique identifier of the band.</param>
+    /// <param name="pagination">Pagination parameters.</param>
     /// <response code="200">CDs retrieved successfully.</response>
     [HttpGet("band/{bandId:int}")]
-    public ActionResult<List<Cd>> GetByBand(int bandId)
+    public ActionResult<PagedResult<Cd>> GetByBand(int bandId, [FromQuery] PaginationQuery pagination)
     {
-        var cds = _service.GetByBand(bandId);
-        return Ok(cds);
+        return Ok(_service.GetByBand(bandId, pagination));
     }
 
     /// <summary>
@@ -73,18 +74,18 @@ public class CdsController : ControllerBase
     /// Performs a name-based search and returns matching CDs.
     /// </remarks>
     /// <param name="name">Name or partial name used for filtering CDs.</param>
+    /// <param name="pagination">Pagination parameters.</param>
     /// <response code="200">Matching CDs retrieved successfully.</response>
     /// <response code="400">The name query parameter is missing or invalid.</response>
     [HttpGet("search")]
-    public ActionResult<List<Cd>> GetByName([FromQuery] string name)
+    public ActionResult<PagedResult<Cd>> GetByName([FromQuery] string name, [FromQuery] PaginationQuery pagination)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
             return BadRequest("The parameter 'name' is mandatory!");
         }
 
-        var cds = _service.GetByName(name);
-        return Ok(cds);
+        return Ok(_service.GetByName(name, pagination));
     }
 
     /// <summary>

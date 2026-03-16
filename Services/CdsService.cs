@@ -1,4 +1,5 @@
 using criacao_api4.Models;
+using criacao_api4.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace criacao_api4.Services;
@@ -14,11 +15,21 @@ public class CdServices
         _logger = logger;
     }
 
-    public List<Cd> GetAll()
+    public PagedResult<Cd> GetAll(PaginationQuery pagination)
     {
-        return _context.Cds
-            .OrderBy(cd => cd.cdId)
-            .ToList();
+        var (pageNumber, pageSize, skip) = pagination.Normalize();
+        var query = _context.Cds.AsNoTracking().OrderBy(cd => cd.cdId);
+        var totalCount = query.Count();
+        var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedResult<Cd>
+        {
+            pageNumber = pageNumber,
+            pageSize = pageSize,
+            totalCount = totalCount,
+            totalPages = totalPages,
+            items = query.Skip(skip).Take(pageSize).ToList()
+        };
     }
 
     public Cd? GetById(int id)
@@ -26,27 +37,55 @@ public class CdServices
         return _context.Cds.FirstOrDefault(cd => cd.cdId == id);
     }
 
-    public List<Cd> GetByBand(int bandId)
+    public PagedResult<Cd> GetByBand(int bandId, PaginationQuery pagination)
     {
-        return _context.Cds
-            .Where(cd => cd.bandId == bandId)
-            .OrderBy(cd => cd.cdId)
-            .ToList();
+        var (pageNumber, pageSize, skip) = pagination.Normalize();
+        var query = _context.Cds.AsNoTracking().Where(cd => cd.bandId == bandId).OrderBy(cd => cd.cdId);
+        var totalCount = query.Count();
+        var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedResult<Cd>
+        {
+            pageNumber = pageNumber,
+            pageSize = pageSize,
+            totalCount = totalCount,
+            totalPages = totalPages,
+            items = query.Skip(skip).Take(pageSize).ToList()
+        };
     }
 
-    public List<Cd> GetByName(string name)
+    public PagedResult<Cd> GetByName(string name, PaginationQuery pagination)
     {
+        var (pageNumber, pageSize, skip) = pagination.Normalize();
         if (string.IsNullOrWhiteSpace(name))
         {
-            return new List<Cd>();
+            return new PagedResult<Cd>
+            {
+                pageNumber = pageNumber,
+                pageSize = pageSize,
+                totalCount = 0,
+                totalPages = 0,
+                items = new List<Cd>()
+            };
         }
 
         var normalizedName = name.Trim().ToLower();
 
-        return _context.Cds
+        var query = _context.Cds.AsNoTracking()
             .Where(cd => cd.name.ToLower().Contains(normalizedName))
-            .OrderBy(cd => cd.cdId)
-            .ToList();
+            .OrderBy(cd => cd.cdId);
+
+        var totalCount = query.Count();
+        var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedResult<Cd>
+        {
+            pageNumber = pageNumber,
+            pageSize = pageSize,
+            totalCount = totalCount,
+            totalPages = totalPages,
+            items = query.Skip(skip).Take(pageSize).ToList()
+        };
     }
 
     public Cd Create(Cd cd)
@@ -104,14 +143,27 @@ public class CdServices
 
         try
         {
-            _context.Database.ExecuteSqlRaw($"DELETE FROM sqlite_sequence WHERE name='{tableName}';");
-            _context.Database.ExecuteSqlRaw(
-                $"INSERT INTO sqlite_sequence(name, seq) SELECT '{tableName}', IFNULL(MAX({idColumn}), 0) FROM {tableName};");
+            var (deleteSql, insertSql) = GetSqliteSequenceResetSql(tableName, idColumn);
+            _context.Database.ExecuteSqlRaw(deleteSql);
+            _context.Database.ExecuteSqlRaw(insertSql);
         }
         catch (Exception exception)
         {
             _logger.LogWarning(exception, "Could not reset SQLite sequence for table {TableName}.", tableName);
         }
+    }
+
+    private static (string DeleteSql, string InsertSql) GetSqliteSequenceResetSql(string tableName, string idColumn)
+    {
+        if (tableName == "Cds" && idColumn == "cdId")
+        {
+            return (
+                "DELETE FROM sqlite_sequence WHERE name='Cds';",
+                "INSERT INTO sqlite_sequence(name, seq) SELECT 'Cds', IFNULL(MAX(cdId), 0) FROM Cds;"
+            );
+        }
+
+        throw new ArgumentException("Invalid SQLite table or id column.");
     }
 
     private void ValidateCd(Cd cd)
@@ -134,8 +186,6 @@ public class CdServices
             throw new ArgumentException("Rating must be between 1 and 5.");
         }
     }
-
-// ############################################################################################################
 
     private void EnsureBandExists(int bandId)
     {

@@ -10,7 +10,7 @@
         "projectUniqueName": "C:\\Users\\afons\\Desktop\\api_completa-06-03-2026\\criacao_api4.csproj",
         "projectName": "criacao_api4",
         "projectPath": "C:\\Users\\afons\\Desktop\\api_completa-06-03-2026\\criacao_api4.csproj",
-        "packagesPath": "C:\\Users\\afons\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\afons\\Desktop\\api_completa-06-03-2026\\.dotnet_cli_home\\.nuget",
         "outputPath": "C:\\Users\\afons\\Desktop\\api_completa-06-03-2026\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
@@ -44,10 +44,6 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
-            "DotNetEnv": {
-              "target": "Package",
-              "version": "[3.1.1, )"
-            },
             "Microsoft.EntityFrameworkCore.Sqlite": {
               "target": "Package",
               "version": "[9.0.2, )"

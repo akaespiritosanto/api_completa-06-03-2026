@@ -2,6 +2,7 @@ namespace criacao_api4.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using criacao_api4.Services;
 using criacao_api4.Models;
+using criacao_api4.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 [ApiController]
@@ -16,19 +17,21 @@ public class BandsController : ControllerBase
         _service = service;
         _logger = logger;
     }
-    
+
     /// <summary>
     /// Retrieves all bands.
     /// </summary>
     /// <remarks>
     /// Returns the complete list of bands currently stored in the database.
     /// </remarks>
+    /// <param name="pagination">Pagination parameters.</param>
     /// <response code="200">Bands retrieved successfully.</response>
     [HttpGet]
-    public ActionResult<List<Band>> GetAll()
+    public ActionResult<PagedResult<Band>> GetAll([FromQuery] PaginationQuery pagination)
     {
-        return Ok(_service.GetAll());
+        return Ok(_service.GetAll(pagination));
     }
+
     /// <summary>
     /// Retrieves a band by ID.
     /// </summary>

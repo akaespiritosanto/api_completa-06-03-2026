@@ -24,17 +24,18 @@ public class MusicBrainzController : ControllerBase
     /// Returns a list of matching releases from the external MusicBrainz API.
     /// </remarks>
     /// <param name="name">Release name used to search on MusicBrainz.</param>
+    /// <param name="pagination">Pagination parameters.</param>
     /// <response code="200">Releases retrieved successfully.</response>
     /// <response code="400">The provided release name is invalid.</response>
     /// <response code="502">MusicBrainz is unavailable or returned an invalid response.</response>
     /// <response code="500">Unexpected server error.</response>
     [HttpGet("{name}")]
-    public async Task<ActionResult<List<MusicBrainz>>> GetRelease(string name)
+    public async Task<ActionResult<PagedResult<MusicBrainz>>> GetRelease(string name, [FromQuery] PaginationQuery pagination)
     {
         try
         {
             var releases = await _musicService.GetRelease(name);
-            return Ok(releases);
+            return Ok(Paginate(releases, pagination));
         }
         catch (ArgumentException exception)
         {
@@ -46,5 +47,22 @@ public class MusicBrainzController : ControllerBase
             _logger.LogError(exception, "Error while calling MusicBrainz for release name {ReleaseName}", name);
             return StatusCode(StatusCodes.Status502BadGateway, "Unable to fetch data from MusicBrainz right now.");
         }
+    }
+
+    private static PagedResult<T> Paginate<T>(IEnumerable<T> items, PaginationQuery pagination)
+    {
+        var list = items as IList<T> ?? items.ToList();
+        var (pageNumber, pageSize, skip) = pagination.Normalize();
+        var totalCount = list.Count;
+        var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedResult<T>
+        {
+            pageNumber = pageNumber,
+            pageSize = pageSize,
+            totalCount = totalCount,
+            totalPages = totalPages,
+            items = list.Skip(skip).Take(pageSize).ToList()
+        };
     }
 }

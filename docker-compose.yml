@@ -9,7 +9,6 @@ x-api-base: &api_base
 services:
   api:
     <<: *api_base
-    profiles: ["build"]
     build: .
     environment:
       - ASPNETCORE_ENVIRONMENT=Development

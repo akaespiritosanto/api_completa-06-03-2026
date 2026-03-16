@@ -1,4 +1,5 @@
 using criacao_api4.Controllers;
+using criacao_api4.Dtos;
 using criacao_api4.Models;
 using criacao_api4.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -23,12 +24,12 @@ public class CdsControllerTests
         db.SaveChanges();
         var controller = CreateController(db);
 
-        var response = controller.GetAll();
+        var response = controller.GetAll(new PaginationQuery());
 
         Assert.IsInstanceOfType(response.Result, typeof(OkObjectResult));
         var ok = (OkObjectResult)response.Result!;
-        var cds = (List<Cd>)ok.Value!;
-        Assert.AreEqual(2, cds.Count);
+        var result = (PagedResult<Cd>)ok.Value!;
+        Assert.AreEqual(2, result.items.Count);
     }
 
     [TestMethod]
@@ -48,7 +49,7 @@ public class CdsControllerTests
         using var db = CreateContext();
         var controller = CreateController(db);
 
-        var response = controller.GetByName(" ");
+        var response = controller.GetByName(" ", new PaginationQuery());
 
         Assert.IsInstanceOfType(response.Result, typeof(BadRequestObjectResult));
     }
@@ -105,12 +106,12 @@ public class CdsControllerTests
         db.SaveChanges();
         var controller = CreateController(db);
 
-        var response = controller.GetByBand(band.bandId);
+        var response = controller.GetByBand(band.bandId, new PaginationQuery());
 
         Assert.IsInstanceOfType(response.Result, typeof(OkObjectResult));
         var ok = (OkObjectResult)response.Result!;
-        var cds = (List<Cd>)ok.Value!;
-        Assert.AreEqual(1, cds.Count);
+        var result = (PagedResult<Cd>)ok.Value!;
+        Assert.AreEqual(1, result.items.Count);
     }
 
     private static CdsController CreateController(AppDbContext db)

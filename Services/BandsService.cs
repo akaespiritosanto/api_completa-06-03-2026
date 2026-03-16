@@ -1,4 +1,5 @@
 using criacao_api4.Models;
+using criacao_api4.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace criacao_api4.Services;
@@ -14,11 +15,21 @@ public class BandServices
         _logger = logger;
     }
 
-    public List<Band> GetAll()
+    public PagedResult<Band> GetAll(PaginationQuery pagination)
     {
-        return _context.Bands
-            .OrderBy(b => b.bandId)
-            .ToList();
+        var (pageNumber, pageSize, skip) = pagination.Normalize();
+        var query = _context.Bands.AsNoTracking().OrderBy(b => b.bandId);
+        var totalCount = query.Count();
+        var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedResult<Band>
+        {
+            pageNumber = pageNumber,
+            pageSize = pageSize,
+            totalCount = totalCount,
+            totalPages = totalPages,
+            items = query.Skip(skip).Take(pageSize).ToList()
+        };
     }
 
     public Band? GetById(int id)
@@ -35,6 +46,7 @@ public class BandServices
         }
 
         var cds = _context.Cds
+            .AsNoTracking()
             .Where(cd => cd.bandId == id)
             .OrderBy(cd => cd.cdId)
             .ToList();
@@ -100,14 +112,35 @@ public class BandServices
 
         try
         {
-            _context.Database.ExecuteSqlRaw($"DELETE FROM sqlite_sequence WHERE name='{tableName}';");
-            _context.Database.ExecuteSqlRaw(
-                $"INSERT INTO sqlite_sequence(name, seq) SELECT '{tableName}', IFNULL(MAX({idColumn}), 0) FROM {tableName};");
+            var (deleteSql, insertSql) = GetSqliteSequenceResetSql(tableName, idColumn);
+            _context.Database.ExecuteSqlRaw(deleteSql);
+            _context.Database.ExecuteSqlRaw(insertSql);
         }
         catch (Exception exception)
         {
             _logger.LogWarning(exception, "Could not reset SQLite sequence for table {TableName}.", tableName);
         }
+    }
+
+    private static (string DeleteSql, string InsertSql) GetSqliteSequenceResetSql(string tableName, string idColumn)
+    {
+        if (tableName == "Bands" && idColumn == "bandId")
+        {
+            return (
+                "DELETE FROM sqlite_sequence WHERE name='Bands';",
+                "INSERT INTO sqlite_sequence(name, seq) SELECT 'Bands', IFNULL(MAX(bandId), 0) FROM Bands;"
+            );
+        }
+
+        if (tableName == "Cds" && idColumn == "cdId")
+        {
+            return (
+                "DELETE FROM sqlite_sequence WHERE name='Cds';",
+                "INSERT INTO sqlite_sequence(name, seq) SELECT 'Cds', IFNULL(MAX(cdId), 0) FROM Cds;"
+            );
+        }
+
+        throw new ArgumentException("Invalid SQLite table or id column.");
     }
 
     private void ValidateBand(Band band)

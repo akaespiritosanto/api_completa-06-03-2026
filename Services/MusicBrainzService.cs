@@ -8,16 +8,14 @@ public class MusicBrainzService
 {
     private readonly HttpClient _httpClient;
 
-    public MusicBrainzService(HttpClient httpClient){
+    public MusicBrainzService(HttpClient httpClient)
+    {
         _httpClient = httpClient;
     }
 
     public async Task<List<MusicBrainz>> GetRelease(string name)
     {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("The parameter 'name' is mandatory.");
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
         var encodedName = Uri.EscapeDataString(name.Trim());
         var url = $"release/?query=release:{encodedName}&fmt=json";
@@ -37,7 +35,7 @@ public class MusicBrainzService
             throw new InvalidOperationException("Invalid response from MusicBrainz.");
         }
 
-        return result?.Releases ?? new List<MusicBrainz>();
+        return result.Releases ?? [];
     }
 
 }

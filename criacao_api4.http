@@ -1,22 +1,15 @@
-@criacao_api4_HostAddress = http://localhost:8080
+@host = http://localhost:8080
+@hostLocal = http://localhost:5223
+@apiKey = scott
 @bandId1 = 1
 @bandId2 = 2
 @cdId1 = 1
 @cdId2 = 2
 
-############################################################
-### HEALTH CHECK (base route test)
-############################################################
-GET {{criacao_api4_HostAddress}}/bands
-Accept: application/json
-
-###
-
-############################################################
 ### BANDS - CREATE (1)
-############################################################
-POST {{criacao_api4_HostAddress}}/bands
+POST {{host}}/bands
 Content-Type: application/json
+X-API-KEY: {{apiKey}}
 
 {
   "name": "Linkin Park",
@@ -25,11 +18,10 @@ Content-Type: application/json
 
 ###
 
-############################################################
 ### BANDS - CREATE (2)
-############################################################
-POST {{criacao_api4_HostAddress}}/bands
+POST {{host}}/bands
 Content-Type: application/json
+X-API-KEY: {{apiKey}}
 
 {
   "name": "Metallica",
@@ -38,35 +30,45 @@ Content-Type: application/json
 
 ###
 
-############################################################
-### BANDS - GET ALL
-############################################################
-GET {{criacao_api4_HostAddress}}/bands
+### BANDS - GET ALL (DEFAULT PAGINATION)
+GET {{host}}/bands
 Accept: application/json
+X-API-KEY: {{apiKey}}
 
 ###
 
-############################################################
-### BANDS - GET BY ID (existing)
-############################################################
-GET {{criacao_api4_HostAddress}}/bands/{{bandId1}}
+### BANDS - GET ALL (PAGINATION pageSize=1)
+GET {{host}}/bands?pageNumber=1&pageSize=1
 Accept: application/json
+X-API-KEY: {{apiKey}}
 
 ###
 
-############################################################
-### BANDS - GET BY ID (not found)
-############################################################
-GET {{criacao_api4_HostAddress}}/bands/999
+### BANDS - GET ALL (PAGINATION pageNumber=2 pageSize=1)
+GET {{host}}/bands?pageNumber=2&pageSize=1
 Accept: application/json
+X-API-KEY: {{apiKey}}
 
 ###
 
-############################################################
-### BANDS - UPDATE (existing)
-############################################################
-PUT {{criacao_api4_HostAddress}}/bands/{{bandId1}}
+### BANDS - GET ALL (PAGINATION pageSize=100 -> max 25)
+GET {{host}}/bands?pageNumber=1&pageSize=100
+Accept: application/json
+X-API-KEY: {{apiKey}}
+
+###
+
+### BANDS - GET BY ID (EXISTING)
+GET {{host}}/bands/{{bandId1}}
+Accept: application/json
+X-API-KEY: {{apiKey}}
+
+###
+
+### BANDS - UPDATE (EXISTING)
+PUT {{host}}/bands/{{bandId1}}
 Content-Type: application/json
+X-API-KEY: {{apiKey}}
 
 {
   "name": "Linkin Park (Updated)",
@@ -75,24 +77,10 @@ Content-Type: application/json
 
 ###
 
-############################################################
-### BANDS - UPDATE (invalid payload)
-############################################################
-PUT {{criacao_api4_HostAddress}}/bands/{{bandId1}}
-Content-Type: application/json
-
-{
-  "name": "   ",
-  "description": "This should fail."
-}
-
-###
-
-############################################################
 ### CDS - CREATE (1)
-############################################################
-POST {{criacao_api4_HostAddress}}/cds
+POST {{host}}/cds
 Content-Type: application/json
+X-API-KEY: {{apiKey}}
 
 {
   "name": "Hybrid Theory",
@@ -102,11 +90,10 @@ Content-Type: application/json
 
 ###
 
-############################################################
 ### CDS - CREATE (2)
-############################################################
-POST {{criacao_api4_HostAddress}}/cds
+POST {{host}}/cds
 Content-Type: application/json
+X-API-KEY: {{apiKey}}
 
 {
   "name": "Meteora",
@@ -116,73 +103,52 @@ Content-Type: application/json
 
 ###
 
-############################################################
-### CDS - CREATE (invalid band)
-############################################################
-POST {{criacao_api4_HostAddress}}/cds
-Content-Type: application/json
-
-{
-  "name": "Invalid CD",
-  "bandId": 999,
-  "rating": 4
-}
-
-###
-
-############################################################
-### CDS - GET ALL
-############################################################
-GET {{criacao_api4_HostAddress}}/cds
+### CDS - GET ALL (DEFAULT PAGINATION)
+GET {{host}}/cds
 Accept: application/json
+X-API-KEY: {{apiKey}}
 
 ###
 
-############################################################
-### CDS - GET BY ID (existing)
-############################################################
-GET {{criacao_api4_HostAddress}}/cds/{{cdId1}}
+### CDS - GET ALL (PAGINATION pageSize=1)
+GET {{host}}/cds?pageNumber=1&pageSize=1
 Accept: application/json
+X-API-KEY: {{apiKey}}
 
 ###
 
-############################################################
-### CDS - GET BY ID (not found)
-############################################################
-GET {{criacao_api4_HostAddress}}/cds/999
+### CDS - GET BY ID (EXISTING)
+GET {{host}}/cds/{{cdId1}}
 Accept: application/json
+X-API-KEY: {{apiKey}}
 
 ###
 
-############################################################
-### CDS - GET BY BAND
-############################################################
-GET {{criacao_api4_HostAddress}}/cds/band/{{bandId1}}
+### CDS - GET BY BAND (DEFAULT PAGINATION)
+GET {{host}}/cds/band/{{bandId1}}
 Accept: application/json
+X-API-KEY: {{apiKey}}
 
 ###
 
-############################################################
+### CDS - GET BY BAND (PAGINATION pageSize=1)
+GET {{host}}/cds/band/{{bandId1}}?pageNumber=1&pageSize=1
+Accept: application/json
+X-API-KEY: {{apiKey}}
+
+###
+
 ### CDS - SEARCH BY NAME
-############################################################
-GET {{criacao_api4_HostAddress}}/cds/search?name=mete
+GET {{host}}/cds/search?name=mete&pageNumber=1&pageSize=25
 Accept: application/json
+X-API-KEY: {{apiKey}}
 
 ###
 
-############################################################
-### CDS - SEARCH BY NAME (invalid query)
-############################################################
-GET {{criacao_api4_HostAddress}}/cds/search?name=
-Accept: application/json
-
-###
-
-############################################################
-### CDS - UPDATE (existing)
-############################################################
-PUT {{criacao_api4_HostAddress}}/cds/{{cdId1}}
+### CDS - UPDATE (EXISTING)
+PUT {{host}}/cds/{{cdId1}}
 Content-Type: application/json
+X-API-KEY: {{apiKey}}
 
 {
   "name": "Hybrid Theory (Remastered)",
@@ -192,52 +158,28 @@ Content-Type: application/json
 
 ###
 
-############################################################
-### CDS - UPDATE (invalid rating)
-############################################################
-PUT {{criacao_api4_HostAddress}}/cds/{{cdId1}}
-Content-Type: application/json
-
-{
-  "name": "Hybrid Theory",
-  "bandId": {{bandId1}},
-  "rating": 10
-}
-
-###
-
-############################################################
 ### BANDS - GET WITH CDS
-############################################################
-GET {{criacao_api4_HostAddress}}/bands/with-cds/{{bandId1}}
+GET {{host}}/bands/with-cds/{{bandId1}}
 Accept: application/json
+X-API-KEY: {{apiKey}}
 
 ###
 
-############################################################
-### CDS - DELETE (existing)
-############################################################
-DELETE {{criacao_api4_HostAddress}}/cds/{{cdId2}}
+### MUSICBRAINZ - GET RELEASES (PAGINATION)
+GET {{host}}/releases/expedita?pageNumber=1&pageSize=10
+Accept: application/json
+X-API-KEY: {{apiKey}}
 
 ###
 
-############################################################
-### CDS - DELETE (not found)
-############################################################
-DELETE {{criacao_api4_HostAddress}}/cds/999
+### CDS - DELETE (EXISTING)
+DELETE {{host}}/cds/{{cdId2}}
+X-API-KEY: {{apiKey}}
 
 ###
 
-############################################################
-### BANDS - DELETE (existing)
-############################################################
-DELETE {{criacao_api4_HostAddress}}/bands/{{bandId2}}
-
-###
-
-############################################################
-### BANDS - DELETE (not found)
-############################################################
-DELETE {{criacao_api4_HostAddress}}/bands/999
+### BANDS - DELETE (EXISTING)
+DELETE {{host}}/bands/{{bandId2}}
+X-API-KEY: {{apiKey}}
 
 ###

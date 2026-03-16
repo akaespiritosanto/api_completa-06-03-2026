@@ -2,6 +2,10 @@ bin/
 obj/
 publish/
 .dotnet/
+.dotnet_home/
+
+# Local restore/debug logs
+restore*.log
 
 # SQLite runtime files (keep the main db file tracked if you want)
 db/*.db-wal

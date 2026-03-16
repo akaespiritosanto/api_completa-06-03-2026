@@ -1,12 +1,14 @@
-using DotNetEnv;
 using criacao_api4.Models;
 using criacao_api4.Services;
+using criacao_api4.Filters;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddScoped<ApiKeyFilter>();
+builder.Services.AddControllers(options => options.Filters.AddService<ApiKeyFilter>());
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
@@ -14,9 +16,30 @@ builder.Services.AddSwaggerGen(options =>
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     options.IncludeXmlComments(xmlPath);
-});
 
-Env.Load();
+    options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.ApiKey,
+        In = ParameterLocation.Header,
+        Name = "X-API-KEY",
+        Description = "API key needed to access the endpoints."
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "ApiKey"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 static string ResolveSqliteConnectionString(string rawConnectionString, string contentRootPath)
 {
@@ -29,7 +52,6 @@ static string ResolveSqliteConnectionString(string rawConnectionString, string c
 
     if (!string.IsNullOrWhiteSpace(sqliteBuilder.DataSource) && !Path.IsPathRooted(sqliteBuilder.DataSource))
     {
-        // Prefer a mounted /data folder when running in a container so the DB persists on the host/volume.
         if (string.Equals(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), "true", StringComparison.OrdinalIgnoreCase)
             && Directory.Exists("/data"))
         {
@@ -97,7 +119,6 @@ if (app.Environment.IsDevelopment())
     }
 }
 
-// Create SQLite database automatically on first run.
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();

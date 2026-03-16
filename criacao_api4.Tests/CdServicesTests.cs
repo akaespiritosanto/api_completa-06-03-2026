@@ -1,3 +1,4 @@
+using criacao_api4.Dtos;
 using criacao_api4.Models;
 using criacao_api4.Services;
 using Microsoft.EntityFrameworkCore;
@@ -46,10 +47,10 @@ public class CdServicesTests
         db.SaveChanges();
 
         var service = new CdServices(db, NullLogger<CdServices>.Instance);
-        var result = service.GetByName("  THEORY ");
+        var result = service.GetByName("  THEORY ", new PaginationQuery());
 
-        Assert.AreEqual(1, result.Count);
-        Assert.AreEqual("Hybrid Theory", result[0].name);
+        Assert.AreEqual(1, result.items.Count);
+        Assert.AreEqual("Hybrid Theory", result.items[0].name);
     }
 
     [TestMethod]
@@ -77,10 +78,10 @@ public class CdServicesTests
         db.SaveChanges();
         var service = new CdServices(db, NullLogger<CdServices>.Instance);
 
-        var result = service.GetByBand(band1.bandId);
+        var result = service.GetByBand(band1.bandId, new PaginationQuery());
 
-        Assert.AreEqual(1, result.Count);
-        Assert.AreEqual("CD 1", result[0].name);
+        Assert.AreEqual(1, result.items.Count);
+        Assert.AreEqual("CD 1", result.items[0].name);
     }
 
     [TestMethod]
@@ -89,9 +90,9 @@ public class CdServicesTests
         using var db = CreateContext();
         var service = new CdServices(db, NullLogger<CdServices>.Instance);
 
-        var result = service.GetByName(" ");
+        var result = service.GetByName(" ", new PaginationQuery());
 
-        Assert.AreEqual(0, result.Count);
+        Assert.AreEqual(0, result.items.Count);
     }
 
     [TestMethod]
